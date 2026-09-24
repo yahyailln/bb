@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Little Note - Romantic Memory Experience</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Dancing+Script:wght@600;700&family=Great+Vibes&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FAF6F0',
+                        vintage: '#F3E9DC',
+                        roseGold: '#C5837B',
+                        softPink: '#FCE7F3',
+                        deepRose: '#881337',
+                        dustyRose: '#9F1239',
+                        warmGold: '#D4AF37',
+                    },
+                    fontFamily: {
+                        handwriting: ['"Great Vibes"', 'cursive'],
+                        cursive: ['"Dancing Script"', 'cursive'],
+                        caveat: ['"Caveat"', 'cursive'],
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Montserrat"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbars and styling resets */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f7f3ed;
+            background-image: 
+                radial-gradient(rgba(197, 131, 123, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(197, 131, 123, 0.1) 1.5px, #f7f3ed 1.5px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            color: #4a3e3d;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f7f3ed;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #be123c;
+            border-radius: 999px;
+        }
+
+        /* Envelope 3D Flipping & Pocket Effect */
+        .envelope-container {
+            perspective: 1200px;
+        }
+
+        .envelope {
+            width: 320px;
+            height: 220px;
+            position: relative;
+            background: #e8dcc8;
+            box-shadow: 
+                0 20px 40px rgba(74, 62, 61, 0.18),
+                0 2px 10px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        @media (min-width: 640px) {
+            .envelope {
+                width: 440px;
+                height: 300px;
+            }
+        }
+        .envelope:hover {
+            transform: translateY(-8px) scale(1.02) rotateX(2deg);
+        }
+
+        /* Top Flap */
+        .envelope .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 135px solid #d8c7ad;
+            transform-origin: top;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s 0.4s;
+            z-index: 5;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        @media (min-width: 640px) {
+            .envelope .flap {
+                border-left-width: 220px;
+                border-right-width: 220px;
+                border-top-width: 175px;
+            }
+        }
+        .envelope.open .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        /* Front Pocket */
+        .envelope .pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid #decdaf;
+            border-right: 160px solid #decdaf;
+            border-bottom: 115px solid #cbba9b;
+            border-radius: 0 0 12px 12px;
+            z-index: 4;
+            filter: drop-shadow(0 -2px 5px rgba(0,0,0,0.05));
+        }
+        @media (min-width: 640px) {
+            .envelope .pocket {
+                border-left-width: 220px;
+                border-right-width: 220px;
+                border-bottom-width: 155px;
+            }
+        }
+
+        /* Preview Card inside envelope */
+        .envelope .letter-preview {
+            position: absolute;
+            bottom: 12px;
+            left: 5%;
+            width: 90%;
+            height: 85%;
+            background: #fffdfa;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+            border: 1px solid #f1e5d1;
+        }
+        .envelope.open .letter-preview {
+            transform: translateY(-130px) scale(1.05);
+        }
+
+        /* Wax Seal Stamp */
+        .wax-seal {
+            width: 54px;
+            height: 54px;
+            background: radial-gradient(circle at 35% 35%, #be123c, #881337 70%, #4c0519);
+            border-radius: 50%;
+            position: absolute;
+            top: 115px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 6;
+            box-shadow: 
+                0 4px 10px rgba(0,0,0,0.3),
+                inset 0 2px 4px rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fecdd3;
+            font-size: 22px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            border: 2px solid #9f1239;
+        }
+        @media (min-width: 640px) {
+            .wax-seal { top: 150px; }
+        }
+        .envelope.open .wax-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.5);
+            pointer-events: none;
+        }
+
+        /* Scratch-off Canvas Styling */
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            touch-action: none;
+            border-radius: 6px;
+            z-index: 10;
+        }
+        .scratch-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Glassmorphism Panels */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(184, 115, 115, 0.08);
+        }
+
+        /* Floating Hearts Animation */
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(0) scale(0.8) rotate(0deg);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-105vh) scale(1.3) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 20;
+            animation: floatHeart 7s linear forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-stone-800 flex flex-col justify-between relative">
+
+    <!-- Full-screen realistic butterfly canvas layer -->
+    <canvas id="butterflyCanvas" class="fixed inset-0 pointer-events-none z-40 w-full h-full"></canvas>
+
+    <!-- Floating Heart Particles Layer -->
+    <div id="heartsContainer" class="fixed inset-0 pointer-events-none z-20 overflow-hidden"></div>
+
+    <header class="fixed top-0 left-0 w-full p-4 flex justify-between items-center z-50 pointer-events-auto">
+        <div class="flex items-center space-x-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-md border border-rose-100">
+            <i class="fa-brands fa-instagram text-rose-600 text-lg"></i>
+            <span class="text-xs sm:text-sm font-semibold tracking-wider text-stone-800">@FLOWERISBLOOMINGG</span>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button id="musicBtn" onclick="toggleMusic()" class="bg-white/90 backdrop-blur-md p-3 rounded-full shadow-md border border-rose-100 text-rose-600 hover:bg-rose-50 transition-all transform active:scale-95 flex items-center justify-center w-10 h-10" title="Toggle Music">
+                <i id="musicIcon" class="fa-solid fa-music"></i>
+            </button>
+            <button onclick="releaseButterflySwarm(15)" class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-md border border-rose-100 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-all transform active:scale-95 flex items-center space-x-1">
+                <span>🦋</span>
+                <span class="hidden sm:inline">More Butterflies</span>
+            </button>
+        </div>
+    </header>
+
+    <section id="envelopeSection" class="min-h-screen flex flex-col items-center justify-center p-4 transition-opacity duration-700">
+        <div class="envelope-container my-auto">
+            <div id="envelope" class="envelope" onclick="openEnvelope()">
+                <div class="flap"></div>
+                <div class="letter-preview flex flex-col justify-center items-center text-center">
+                    <span class="text-rose-500 text-sm font-semibold tracking-widest uppercase mb-1">To My Love</span>
+                    <h2 class="font-handwriting text-3xl sm:text-4xl text-rose-800">A Little Note</h2>
+                    <p class="font-caveat text-stone-500 text-base mt-2">Tap to unseal and read</p>
+                </div>
+                <div class="pocket"></div>
+                <div class="wax-seal">
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+        </div>
+        <p class="mt-8 text-stone-500 text-xs sm:text-sm tracking-widest uppercase font-semibold animate-pulse">
+            ✨ Tap the envelope to open
+        </p>
+    </section>
+
+    <main id="mainContent" class="hidden min-h-screen max-w-4xl mx-auto px-4 py-20 flex flex-col items-center space-y-16">
+
+        <article class="w-full bg-[#fcf8f2] p-6 sm:p-12 rounded-3xl shadow-xl border border-amber-100/60 relative overflow-hidden transition-all duration-500">
+            <!-- Vintage Paper Accent Stamps -->
+            <div class="absolute top-4 right-4 text-amber-900/10 font-serif text-6xl pointer-events-none select-none">
+                <i class="fa-solid fa-stamp"></i>
+            </div>
+            <div class="absolute -bottom-10 -left-10 text-rose-200/40 text-9xl pointer-events-none select-none">
+                <i class="fa-solid fa-feather-pointed"></i>
+            </div>
+
+            <div class="text-center mb-8">
+                <span class="text-rose-500 font-medium text-xs tracking-widest uppercase">Special Letter</span>
+                <h1 class="font-handwriting text-5xl sm:text-7xl text-rose-900 mt-1 mb-2">A little note</h1>
+                <p class="font-serif italic text-stone-500 text-sm sm:text-base">For the one who holds my heart</p>
+            </div>
+
+            <!-- Letter Body with Custom Scrollbar -->
+            <div class="max-h-[420px] overflow-y-auto pr-3 font-serif text-stone-700 leading-relaxed text-base sm:text-lg space-y-5">
+                <p class="font-semibold text-rose-900">My love,</p>
+                <p>I know today felt like the floor dropped out. I was not in the room when it started, and I hate that. I hate that you had to carry the first hour of it without my hand on your back. So I am writing until my hand is tired, because a short "it will be okay" is not enough for a day like this.</p>
+                <p>If you are reading this with your shoulders up around your ears, you can put the phone down in a minute. You do not have to finish it in one sitting. I will still be here when you come back. I wanted the letter to be long on purpose. I wanted you to have something to walk through, slowly, the way you walk through a house with the lights on after a bad dream.</p>
+                <p>I keep thinking about the version of you that woke up this morning already braced. The one who checked the time and felt the day sitting on your chest before you even stood up. I know that body. I have watched your shoulders tighten when you make coffee before you've even had a chance to breathe.</p>
+                <p>I want you to scroll and keep finding me here. That is why it is long. I wanted the letter to last longer than the panic. I wanted there to be more of my voice than of the day that hurt you. If you are still reading, then I am still in the next line.</p>
+                <p>Imagine us later, when this day is a story we tell with a softer mouth. You will say it was a bad one. I will say we survived it together. I love you, beyond every measure.</p>
+            </div>
+
+            <div class="mt-8 text-right font-handwriting text-3xl sm:text-4xl text-rose-800">
+                Forever yours, ♡
+            </div>
+        </article>
+
+        <section class="w-full space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="font-serif text-2xl sm:text-3xl font-semibold text-stone-800">Scratch & Reveal Memories</h2>
+                <p class="text-xs sm:text-sm text-stone-500">Drag or touch over the canvas layer to reveal our photos</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+                
+                <!-- Polaroid Card 1 -->
+                <div class="bg-white p-4 pb-6 rounded-2xl shadow-lg border border-stone-200/60 flex flex-col items-center transform -rotate-2 hover:rotate-0 transition-transform duration-300">
+                    <div class="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-stone-100 shadow-inner">
+                        <!-- Underneath Hidden Vector Illustration Photo -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-rose-100 to-pink-200 flex flex-col justify-center items-center p-4 text-center">
+                            <svg class="w-24 h-24 text-rose-500 mb-2 drop-shadow" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            <span class="font-cursive text-rose-900 text-2xl font-bold">Warmest Hugs</span>
+                            <span class="text-xs text-rose-700 mt-1 font-medium">Safe in your arms</span>
+                        </div>
+                        <canvas id="scratchCanvas1" class="scratch-canvas"></canvas>
+                    </div>
+                    <p class="font-caveat text-stone-700 text-2xl mt-4">Soft launch walk</p>
+                </div>
+
+                <!-- Polaroid Card 2 -->
+                <div class="bg-white p-4 pb-6 rounded-2xl shadow-lg border border-stone-200/60 flex flex-col items-center transform rotate-2 hover:rotate-0 transition-transform duration-300">
+                    <div class="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-stone-100 shadow-inner">
+                        <!-- Underneath Hidden Vector Illustration Photo -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-amber-100 to-orange-200 flex flex-col justify-center items-center p-4 text-center">
+                            <div class="w-20 h-20 rounded-full bg-amber-300/60 flex items-center justify-center text-amber-700 text-3xl mb-2 shadow-inner">
+                                <i class="fa-solid fa-ring"></i>
+                            </div>
+                            <span class="font-cursive text-amber-900 text-2xl font-bold">Forever Promise</span>
+                            <span class="text-xs text-amber-800 mt-1 font-medium">Under the late cafe lights</span>
+                        </div>
+                        <canvas id="scratchCanvas2" class="scratch-canvas"></canvas>
+                    </div>
+                    <p class="font-caveat text-stone-700 text-2xl mt-4">Late cafe</p>
+                </div>
+
+                <!-- Polaroid Card 3 -->
+                <div class="bg-white p-4 pb-6 rounded-2xl shadow-lg border border-stone-200/60 flex flex-col items-center transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                    <div class="relative w-full aspect-[4/5] rounded-lg overflow-hidden bg-stone-100 shadow-inner">
+                        <!-- Underneath Hidden Vector Illustration Photo -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-100 to-teal-200 flex flex-col justify-center items-center p-4 text-center">
+                            <div class="w-20 h-20 rounded-full bg-emerald-300/60 flex items-center justify-center text-emerald-800 text-3xl mb-2 shadow-inner">
+                                <i class="fa-solid fa-plane-departure"></i>
+                            </div>
+                            <span class="font-cursive text-emerald-950 text-2xl font-bold">Our Journeys</span>
+                            <span class="text-xs text-emerald-800 mt-1 font-medium">Creating new tracks</span>
+                        </div>
+                        <canvas id="scratchCanvas3" class="scratch-canvas"></canvas>
+                    </div>
+                    <p class="font-caveat text-stone-700 text-2xl mt-4">Travel memories</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            
+            <!-- Memory Map Card -->
+            <div class="glass-card p-6 rounded-3xl space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center">
+                        <i class="fa-solid fa-map-location-dot text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-semibold text-stone-800">Memory Map</h3>
+                        <p class="text-xs text-stone-500">Places where our hearts stayed</p>
+                    </div>
+                </div>
+
+                <div class="relative w-full h-60 bg-stone-200 rounded-2xl overflow-hidden border border-stone-300/80 shadow-inner flex items-center justify-center">
+                    <!-- SVG Vintage Map Graphic Background -->
+                    <svg class="absolute inset-0 w-full h-full object-cover opacity-40" viewBox="0 0 400 240" fill="none">
+                        <path d="M10 50 Q 80 10 150 60 T 300 40 T 390 100" stroke="#a89a8c" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+                        <path d="M40 180 Q 120 140 220 200 T 380 150" stroke="#a89a8c" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+                        <circle cx="90" cy="70" r="40" fill="#e5dec9" opacity="0.6"/>
+                        <circle cx="210" cy="130" r="50" fill="#e5dec9" opacity="0.6"/>
+                        <circle cx="310" cy="80" r="35" fill="#e5dec9" opacity="0.6"/>
+                    </svg>
+
+                    <!-- Interactive Location Pins -->
+                    <button onclick="selectPin('Laos', '📍 Laos: Walking together under the star-filled sky.')" class="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2 group z-10">
+                        <div class="w-9 h-9 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg group-hover:scale-125 transition-transform">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <span class="bg-stone-900/90 text-white text-[11px] font-medium px-2.5 py-1 rounded-full absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">Laos</span>
+                    </button>
+
+                    <button onclick="selectPin('Thailand', '📍 Thailand: Tasting delicious street food and laughing non-stop.')" class="absolute top-1/2 left-2/4 transform -translate-x-1/2 -translate-y-1/2 group z-10">
+                        <div class="w-9 h-9 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-lg group-hover:scale-125 transition-transform">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <span class="bg-stone-900/90 text-white text-[11px] font-medium px-2.5 py-1 rounded-full absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">Thailand</span>
+                    </button>
+
+                    <button onclick="selectPin('Vietnam', '📍 Vietnam: Soft launch walk near the ancient Hanoi cafes.')" class="absolute bottom-1/4 right-1/4 transform -translate-x-1/2 -translate-y-1/2 group z-10">
+                        <div class="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg group-hover:scale-125 transition-transform">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <span class="bg-stone-900/90 text-white text-[11px] font-medium px-2.5 py-1 rounded-full absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">Vietnam</span>
+                    </button>
+                </div>
+
+                <div id="pinNote" class="bg-rose-50/80 p-3 rounded-xl border border-rose-100 text-center text-xs sm:text-sm text-rose-900 font-medium">
+                    Tap a location pin on the map to unlock memories!
+                </div>
+            </div>
+
+            <!-- Voice Note Player Card -->
+            <div class="glass-card p-6 rounded-3xl space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center">
+                        <i class="fa-solid fa-microphone-lines text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif text-lg font-semibold text-stone-800">Voice Note</h3>
+                        <p class="text-xs text-stone-500">A special voice message for you</p>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 p-5 rounded-2xl border border-rose-100/80 shadow-sm flex flex-col space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-file-audio text-rose-500"></i>
+                            <span class="text-xs font-semibold text-stone-700">voice_message_for_you.m4a</span>
+                        </div>
+                        <span id="voiceTimer" class="text-xs font-mono text-rose-600 font-semibold">0:00 / 0:18</span>
+                    </div>
+
+                    <!-- Audio Waveform Visualization -->
+                    <div class="flex items-center justify-between space-x-1 h-10 px-2 bg-rose-50/50 rounded-xl" id="waveformContainer">
+                        <!-- Bars dynamically added via JavaScript -->
+                    </div>
+
+                    <!-- Play Control Button -->
+                    <div class="flex items-center justify-center pt-1">
+                        <button id="voicePlayBtn" onclick="toggleVoiceNote()" class="w-14 h-14 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center shadow-lg transition-transform transform active:scale-95">
+                            <i id="voicePlayIcon" class="fa-solid fa-play text-xl ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center pt-8 pb-10 space-y-2 text-stone-400 text-xs">
+            <p>Made with ♡ for someone irreplaceable</p>
+            <p>© @FLOWERISBLOOMINGG • All rights reserved</p>
+        </footer>
+
+    </main>
+
+    <script>
+        /* -------------------------------------------------------------------------
+         * 1. AUDIO SYNTHESIZER (Web Audio API for background music & sound effects)
+         * ------------------------------------------------------------------------- */
+        let audioCtx = null;
+        let isMusicPlaying = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleMusic() {
+            initAudio();
+            const btn = document.getElementById('musicBtn');
+            const icon = document.getElementById('musicIcon');
+
+            if (isMusicPlaying) {
+                isMusicPlaying = false;
+                icon.className = "fa-solid fa-music";
+                btn.classList.remove('bg-rose-200');
+            } else {
+                isMusicPlaying = true;
+                icon.className = "fa-solid fa-pause";
+                btn.classList.add('bg-rose-200');
+                playAmbientMelody();
+            }
+        }
+
+        function playAmbientMelody() {
+            if (!audioCtx || !isMusicPlaying) return;
+            // Warm piano-like frequency sequence (C Major 9)
+            const notes = [261.63, 329.63, 392.00, 493.88, 523.25, 440.00, 349.23, 392.00];
+            let noteIdx = 0;
+
+            function playNext() {
+                if (!isMusicPlaying) return;
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(notes[noteIdx % notes.length], audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.4);
+
+                noteIdx++;
+                setTimeout(playNext, 750);
+            }
+            playNext();
+        }
+
+        /* -------------------------------------------------------------------------
+         * 2. ENVELOPE INTERACTION & TRANSITION
+         * ------------------------------------------------------------------------- */
+        function openEnvelope() {
+            initAudio();
+            const envelope = document.getElementById('envelope');
+            const envelopeSec = document.getElementById('envelopeSection');
+            const mainContent = document.getElementById('mainContent');
+
+            envelope.classList.add('open');
+
+            // Burst of butterflies when unsealed
+            releaseButterflySwarm(25);
+
+            setTimeout(() => {
+                envelopeSec.classList.add('opacity-0');
+                setTimeout(() => {
+                    envelopeSec.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 500);
+            }, 1100);
+        }
+
+        /* -------------------------------------------------------------------------
+         * 3. REALISTIC BUTTERFLY CANVAS SIMULATION
+         * ------------------------------------------------------------------------- */
+        const canvas = document.getElementById('butterflyCanvas');
+        const ctx = canvas.getContext('2d');
+        let butterflies = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class RealisticButterfly {
+            constructor() {
+                this.reset(true);
+            }
+
+            reset(initial = false) {
+                this.x = Math.random() * canvas.width;
+                this.y = initial ? Math.random() * canvas.height : canvas.height + 40;
+                this.size = Math.random() * 14 + 14;
+                this.speedY = Math.random() * 1.5 + 1.2;
+                this.speedX = (Math.random() - 0.5) * 1.2;
+                
+                // Color palettes: Monarch, Blue Morpho, Swallowtail, Pink Velvet
+                const palettes = [
+                    { main: '#f97316', secondary: '#ef4444', edge: '#1e293b' }, // Orange/Red
+                    { main: '#3b82f6', secondary: '#06b6d4', edge: '#0f172a' }, // Blue
+                    { main: '#ec4899', secondary: '#f43f5e', edge: '#881337' }, // Pink
+                    { main: '#eab308', secondary: '#f97316', edge: '#451a03' }  // Gold
+                ];
+                this.palette = palettes[Math.floor(Math.random() * palettes.length)];
+                
+                this.wingPhase = Math.random() * Math.PI * 2;
+                this.wingSpeed = Math.random() * 0.15 + 0.12;
+                this.wobbleSpeed = Math.random() * 0.03 + 0.01;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.x += Math.sin(this.y * this.wobbleSpeed) + this.speedX;
+                this.wingPhase += this.wingSpeed;
+
+                if (this.y < -50 || this.x < -50 || this.x > canvas.width + 50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Flapping wing scale factor using sine wave
+                const wingScale = Math.sin(this.wingPhase);
+
+                // Draw Left Wing
+                ctx.save();
+                ctx.scale(wingScale, 1);
+                this.drawWing(-1);
+                ctx.restore();
+
+                // Draw Right Wing
+                ctx.save();
+                ctx.scale(-wingScale, 1);
+                this.drawWing(1);
+                ctx.restore();
+
+                // Butterfly Body
+                ctx.fillStyle = '#1c1917';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 2, this.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            drawWing(dir) {
+                const s = this.size;
+
+                // Forewing
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(s * 0.8, -s * 0.9, s * 1.3, -s * 0.2, s * 0.8, s * 0.3);
+                ctx.bezierCurveTo(s * 0.4, s * 0.4, 0, s * 0.1, 0, 0);
+                
+                let grad = ctx.createLinearGradient(0, 0, s, 0);
+                grad.addColorStop(0, this.palette.main);
+                grad.addColorStop(0.8, this.palette.secondary);
+                grad.addColorStop(1, this.palette.edge);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+
+                // Hindwing
+                ctx.beginPath();
+                ctx.moveTo(0, s * 0.1);
+                ctx.bezierCurveTo(s * 0.9, s * 0.3, s * 0.7, s * 1.1, 0, s * 0.8);
+                ctx.fillStyle = this.palette.secondary;
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+
+        function releaseButterflySwarm(count = 15) {
+            for (let i = 0; i < count; i++) {
+                butterflies.push(new RealisticButterfly());
+            }
+        }
+
+        // Initialize default butterflies
+        releaseButterflySwarm(12);
+
+        function animateButterflies() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            butterflies.forEach(b => {
+                b.update();
+                b.draw();
+            });
+            requestAnimationFrame(animateButterflies);
+        }
+        animateButterflies();
+
+        /* -------------------------------------------------------------------------
+         * 4. SCRATCH-OFF CANVAS POLAROID LOGIC
+         * ------------------------------------------------------------------------- */
+        function setupScratchCanvas(canvasId) {
+            const scratchCanvas = document.getElementById(canvasId);
+            if (!scratchCanvas) return;
+            const sCtx = scratchCanvas.getContext('2d');
+
+            function initCanvas() {
+                const rect = scratchCanvas.parentElement.getBoundingClientRect();
+                scratchCanvas.width = rect.width;
+                scratchCanvas.height = rect.height;
+
+                // Silver Scratch Coating Gradient
+                const grad = sCtx.createLinearGradient(0, 0, scratchCanvas.width, scratchCanvas.height);
+                grad.addColorStop(0, '#d1d5db');
+                grad.addColorStop(0.5, '#e5e7eb');
+                grad.addColorStop(1, '#9ca3af');
+
+                sCtx.fillStyle = grad;
+                sCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+
+                // Scratch Text Label
+                sCtx.font = 'bold 22px "Dancing Script", cursive';
+                sCtx.fillStyle = '#4b5563';
+                sCtx.textAlign = 'center';
+                sCtx.fillText('Scratch me ♡', scratchCanvas.width / 2, scratchCanvas.height / 2);
+            }
+
+            initCanvas();
+
+            let isScratching = false;
+
+            function scratch(e) {
+                if (!isScratching) return;
+                const rect = scratchCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+
+                sCtx.globalCompositeOperation = 'destination-out';
+                sCtx.beginPath();
+                sCtx.arc(x, y, 22, 0, Math.PI * 2);
+                sCtx.fill();
+            }
+
+            scratchCanvas.addEventListener('mousedown', () => isScratching = true);
+            scratchCanvas.addEventListener('mouseup', () => isScratching = false);
+            scratchCanvas.addEventListener('mousemove', scratch);
+
+            scratchCanvas.addEventListener('touchstart', (e) => { isScratching = true; scratch(e); });
+            scratchCanvas.addEventListener('touchend', () => isScratching = false);
+            scratchCanvas.addEventListener('touchmove', scratch);
+        }
+
+        window.addEventListener('load', () => {
+            setupScratchCanvas('scratchCanvas1');
+            setupScratchCanvas('scratchCanvas2');
+            setupScratchCanvas('scratchCanvas3');
+            initWaveformUI();
+        });
+
+        /* -------------------------------------------------------------------------
+         * 5. MEMORY MAP & VOICE NOTE PLAYER LOGIC
+         * ------------------------------------------------------------------------- */
+        function selectPin(title, message) {
+            const noteEl = document.getElementById('pinNote');
+            noteEl.textContent = message;
+            noteEl.classList.add('bg-rose-100');
+            setTimeout(() => noteEl.classList.remove('bg-rose-100'), 400);
+        }
+
+        function initWaveformUI() {
+            const container = document.getElementById('waveformContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const bar = document.createElement('div');
+                const height = Math.floor(Math.random() * 24) + 6;
+                bar.className = 'w-1 bg-rose-400 rounded-full transition-all duration-300';
+                bar.style.height = `${height}px`;
+                container.appendChild(bar);
+            }
+        }
+
+        let isVoicePlaying = false;
+        let voiceTimer = null;
+        let elapsedSec = 0;
+
+        function toggleVoiceNote() {
+            initAudio();
+            const btnIcon = document.getElementById('voicePlayIcon');
+            const timerEl = document.getElementById('voiceTimer');
+            const bars = document.getElementById('waveformContainer').children;
+
+            if (isVoicePlaying) {
+                clearInterval(voiceTimer);
+                isVoicePlaying = false;
+                btnIcon.className = "fa-solid fa-play text-xl ml-1";
+            } else {
+                isVoicePlaying = true;
+                btnIcon.className = "fa-solid fa-pause text-xl";
+
+                // Voice tone simulation
+                if (audioCtx) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                }
+
+                voiceTimer = setInterval(() => {
+                    elapsedSec++;
+                    if (elapsedSec > 18) {
+                        elapsedSec = 0;
+                        clearInterval(voiceTimer);
+                        isVoicePlaying = false;
+                        btnIcon.className = "fa-solid fa-play text-xl ml-1";
+                    }
+
+                    const formatted = `0:${elapsedSec < 10 ? '0' : ''}${elapsedSec}`;
+                    timerEl.textContent = `${formatted} / 0:18`;
+
+                    // Animate Waveform
+                    Array.from(bars).forEach(bar => {
+                        const h = Math.floor(Math.random() * 26) + 4;
+                        bar.style.height = `${h}px`;
+                    });
+                }, 1000);
+            }
+        }
+
+        /* -------------------------------------------------------------------------
+         * 6. BACKGROUND FLOATING HEARTS GENERATOR
+         * ------------------------------------------------------------------------- */
+        function spawnFloatingHeart() {
+            const container = document.getElementById('heartsContainer');
+            if (!container) return;
+
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart text-rose-300/40 text-lg sm:text-xl';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            heart.innerHTML = '♥';
+
+            container.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 8000);
+        }
+        setInterval(spawnFloatingHeart, 1000);
+    </script>
+</body>
+</html>
