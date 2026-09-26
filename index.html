@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Little Note</title>
+    <style>
+        /* إعدادات عامة والخلفية الكريمية */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #F6F1EB; /* لون كريمي دافئ */
+            font-family: 'Georgia', serif;
+            overflow-x: hidden;
+            cursor: none; /* إخفاء الفأرة العادية باش يبان القلب */
+        }
+
+        /* الفأرة على شكل قلب */
+        #heart-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            font-size: 24px;
+            pointer-events: none; /* باش ما يأثرش على الكليك */
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out;
+        }
+
+        .trail-heart {
+            position: fixed;
+            font-size: 14px;
+            color: #d9534f;
+            pointer-events: none;
+            z-index: 9998;
+            animation: fadeOut 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(0.5) translateY(-20px); }
+        }
+
+        /* ظرف الرسالة (Envelope) */
+        #envelope-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #F6F1EB;
+            z-index: 100;
+            transition: opacity 1s ease;
+        }
+
+        .envelope {
+            width: 300px;
+            height: 200px;
+            background-color: #e2cfae;
+            position: relative;
+            cursor: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .flap {
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 100px solid #d4c09d;
+            transform-origin: top;
+            transition: transform 1s ease;
+        }
+
+        .envelope.open .flap {
+            transform: rotateX(180deg);
+        }
+
+        .tap-text {
+            margin-top: 30px;
+            font-style: italic;
+            color: #887865;
+            letter-spacing: 2px;
+        }
+
+        /* المحتوى الرئيسي (مخفي في البداية) */
+        #main-content {
+            display: none;
+            opacity: 0;
+            padding: 50px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            transition: opacity 2s ease;
+        }
+
+        /* تصميم الرسالة */
+        .letter-box {
+            background: #fffefb;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            margin-bottom: 50px;
+            line-height: 1.8;
+            color: #4a433c;
+            border: 1px solid #e9e3d9;
+        }
+
+        .letter-box h1 {
+            text-align: center;
+            color: #332d28;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        /* صور البولارويد (Polaroids) */
+        .gallery {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .polaroid {
+            background: white;
+            padding: 15px 15px 40px 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            width: 200px;
+            height: 250px;
+            transform: rotate(-3deg);
+            transition: transform 0.3s ease;
+        }
+
+        .polaroid:nth-child(2) { transform: rotate(4deg); }
+        .polaroid:nth-child(3) { transform: rotate(-2deg); }
+        .polaroid:hover { transform: scale(1.05) rotate(0deg); z-index: 10; }
+
+        .polaroid-img {
+            width: 100%;
+            height: 200px;
+            background-color: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 200px;
+            height: 200px;
+            cursor: none;
+        }
+
+        .polaroid-caption {
+            text-align: center;
+            margin-top: 15px;
+            font-family: 'Brush Script MT', cursive;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* المذكرة الصوتية (Voice Note) */
+        .voice-note-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .play-btn {
+            background: #333;
+            color: white;
+            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- مؤشر الفأرة (القلب) -->
+    <div id="heart-cursor">❤️</div>
+
+    <!-- واجهة الظرف (Envelope) -->
+    <div id="envelope-container">
+        <div class="envelope" id="envelope" onclick="openEnvelope()">
+            <div class="flap"></div>
+        </div>
+        <div class="tap-text">Tap to open</div>
+    </div>
+
+    <!-- المحتوى الرئيسي (الرسالة والصور) -->
+    <div id="main-content">
+        <!-- الرسالة -->
+        <div class="letter-box">
+            <h1 id="cfg-title"></h1>
+            <h3 id="cfg-greeting"></h3>
+            <p id="cfg-p1"></p>
+            <p id="cfg-p2"></p>
+            <p id="cfg-p3"></p>
+            <h4 id="cfg-sig" style="text-align: right; font-style: italic;"></h4>
+        </div>
+
+        <!-- صور البولارويد (Scratch-off) -->
+        <div class="gallery" id="polaroid-gallery">
+            <!-- سيتم توليد الصور هنا عبر جافاسكريبت -->
+        </div>
+
+        <!-- المذكرة الصوتية -->
+        <div class="voice-note-card">
+            <button class="play-btn" id="play-btn">▶</button>
+            <div>
+                <strong id="cfg-audio-title">Voice note</strong>
+                <div style="font-size: 12px; color: gray;">0:00 / <span id="cfg-audio-dur"></span></div>
+            </div>
+            <!-- مخفي: مشغل الصوت -->
+            <audio id="audio-player" src=""></audio>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // 🛠️ منطقة التعديل (CONFIG) - هنا تقدر تبدل أي حاجة بسهولة
+        // ====================================================================
+        const CONFIG = {
+            letter: {
+                title: "A Little Note",
+                greeting: "My love,",
+                paragraph1: "I know today felt like the floor dropped out. I am writing this to remind you how much you mean to me.",
+                paragraph2: "If you are reading this, I want you to take a deep breath. You are safe here, and I will always hold your hand.",
+                paragraph3: "I keep thinking about the version of you that wakes up every morning, ready to face the world. I love that version, and I love every version of you.",
+                signature: "Yours Always, ❤️"
+            },
+            polaroids: [
+                { 
+                    caption: "Scratch me", 
+                    imageUrl: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=300" // حط رابط صورتك الأولى هنا
+                },
+                { 
+                    caption: "Scratch me", 
+                    imageUrl: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=300" // حط رابط صورتك الثانية هنا
+                },
+                { 
+                    caption: "Scratch me", 
+                    imageUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=300" // حط رابط صورتك الثالثة هنا
+                }
+            ],
+            audio: {
+                title: "Our Memory Note",
+                duration: "0:45",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // حط رابط التسجيل الصوتي ديالك هنا
+            }
+        };
+        // ====================================================================
+
+
+        // 1. برمجة الفأرة (القلب اللي كيتبعك)
+        const cursor = document.getElementById('heart-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            // إنشاء قلوب صغيرة كطيح
+            if (Math.random() < 0.1) {
+                const heart = document.createElement('div');
+                heart.innerText = '❤️';
+                heart.className = 'trail-heart';
+                heart.style.left = e.clientX + 'px';
+                heart.style.top = e.clientY + 'px';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1000);
+            }
+        });
+
+        // 2. تعبئة النصوص من CONFIG
+        document.getElementById('cfg-title').innerText = CONFIG.letter.title;
+        document.getElementById('cfg-greeting').innerText = CONFIG.letter.greeting;
+        document.getElementById('cfg-p1').innerText = CONFIG.letter.paragraph1;
+        document.getElementById('cfg-p2').innerText = CONFIG.letter.paragraph2;
+        document.getElementById('cfg-p3').innerText = CONFIG.letter.paragraph3;
+        document.getElementById('cfg-sig').innerText = CONFIG.letter.signature;
+        
+        document.getElementById('cfg-audio-title').innerText = CONFIG.audio.title;
+        document.getElementById('cfg-audio-dur').innerText = CONFIG.audio.duration;
+        document.getElementById('audio-player').src = CONFIG.audio.url;
+
+        // 3. توليد صور البولارويد وإضافة تأثير الخدش (Scratch)
+        const gallery = document.getElementById('polaroid-gallery');
+        CONFIG.polaroids.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'polaroid';
+            div.innerHTML = `
+                <div class="polaroid-img" style="background-image: url('${item.imageUrl}')"></div>
+                <canvas class="scratch-canvas" id="scratch-${index}"></canvas>
+                <div class="polaroid-caption">${item.caption}</div>
+            `;
+            gallery.appendChild(div);
+            initScratchCanvas(`scratch-${index}`);
+        });
+
+        // دالة الخدش (Scratch)
+        function initScratchCanvas(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200; canvas.height = 200;
+            
+            // اللون اللي كيغطي الصورة (رمادي ميتاليك/بني)
+            ctx.fillStyle = '#8a7a6b'; 
+            ctx.fillRect(0, 0, 200, 200);
+            
+            // كتابة Scratch me فوق الغطاء
+            ctx.font = "20px Georgia";
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.fillText("Scratch me", 100, 100);
+
+            let isDrawing = false;
+            
+            const scratch = (e) => {
+                if (!isDrawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+            };
+
+            canvas.addEventListener('mousedown', () => isDrawing = true);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mousemove', scratch);
+            
+            canvas.addEventListener('touchstart', () => isDrawing = true);
+            canvas.addEventListener('touchend', () => isDrawing = false);
+            canvas.addEventListener('touchmove', scratch);
+        }
+
+        // 4. فتح الظرف (Envelope)
+        function openEnvelope() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.add('open');
+            
+            setTimeout(() => {
+                document.getElementById('envelope-container').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('envelope-container').style.display = 'none';
+                    const main = document.getElementById('main-content');
+                    main.style.display = 'block';
+                    setTimeout(() => main.style.opacity = '1', 100);
+                }, 1000);
+            }, 1000);
+        }
+
+        // 5. تشغيل الصوت
+        const playBtn = document.getElementById('play-btn');
+        const audio = document.getElementById('audio-player');
+        let isPlaying = false;
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                playBtn.innerText = '▶';
+            } else {
+                audio.play();
+                playBtn.innerText = '⏸';
+            }
+            isPlaying = !isPlaying;
+        });
+
+    </script>
+</body>
+</html>
